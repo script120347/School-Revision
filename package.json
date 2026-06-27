@@ -1,12 +1,14 @@
 {
-  "name": "sigma-hub",
+  "name": "sigma-hub-server",
   "version": "1.0.0",
-  "description": "Sigma Hub Server",
+  "description": "Server for Sigma Hub Chat",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3"
   }
 }
