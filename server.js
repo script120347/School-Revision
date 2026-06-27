@@ -1,15 +1,18 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json());
 
-// Serve static files with correct MIME types
+// Serve index.html correctly
+app.get('/', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.use(express.static('public', {
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {
@@ -18,11 +21,9 @@ app.use(express.static('public', {
     }
 }));
 
-// File paths
 const USERS_FILE = path.join(__dirname, 'users.json');
 const MESSAGES_FILE = path.join(__dirname, 'messages.json');
 
-// ---- Helpers ----
 function readUsers() {
     try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); }
     catch { return {}; }
@@ -38,13 +39,9 @@ function writeMessages(msgs) {
     fs.writeFileSync(MESSAGES_FILE, JSON.stringify(msgs, null, 2));
 }
 
-// ---- Routes ----
 app.post('/api/register', (req, res) => {
     const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password required' });
-    }
-    if (username.length < 2 || password.length < 4) {
+    if (!username || !password || username.length < 2 || password.length < 4) {
         return res.status(400).json({ error: 'Invalid input' });
     }
     const users = readUsers();
@@ -53,7 +50,6 @@ app.post('/api/register', (req, res) => {
     }
     users[username] = password;
     writeUsers(users);
-    console.log('✅ Registered:', username);
     res.json({ message: 'Registration successful' });
 });
 
@@ -69,7 +65,6 @@ app.post('/api/login', (req, res) => {
     if (users[username] !== password) {
         return res.status(401).json({ error: 'Incorrect password' });
     }
-    console.log('✅ Logged in:', username);
     res.json({ message: 'Login successful', username });
 });
 
@@ -79,12 +74,7 @@ app.post('/api/messages', (req, res) => {
         return res.status(400).json({ error: 'Username and text required' });
     }
     const msgs = readMessages();
-    msgs.push({
-        user: username,
-        text: text,
-        time: new Date().toLocaleTimeString(),
-        to: to || 'public'
-    });
+    msgs.push({ user: username, text, time: new Date().toLocaleTimeString(), to: to || 'public' });
     if (msgs.length > 500) msgs.splice(0, msgs.length - 500);
     writeMessages(msgs);
     res.json({ message: 'Message sent' });
@@ -99,11 +89,11 @@ app.get('/api/users', (req, res) => {
     res.json(Object.keys(users));
 });
 
-// Root route - serve index.html
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
+    res.setHeader('Content-Type', 'text/html');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
 });
