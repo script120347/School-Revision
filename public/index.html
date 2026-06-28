@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google</title>
+    <title>Sigma Chat</title>
     <link rel="icon" href="https://www.google.com/favicon.ico">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -77,34 +77,53 @@
             margin-bottom: 10px;
             flex-shrink: 0;
         }
-        #chat-header h2 { 
-            color: #d4b0ff; 
-            font-size: 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-        #chat-header h2 span { color: #a070d0; }
-        .google-logo {
+        #chat-header h2 {
+            color: #d4b0ff;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 22px;
-            font-weight: 500;
-            font-family: 'Product Sans', 'Segoe UI', Arial, sans-serif;
+            gap: 12px;
         }
-        .google-logo .g { color: #4285F4; }
-        .google-logo .o1 { color: #EA4335; }
-        .google-logo .o2 { color: #FBBC05; }
-        .google-logo .l { color: #34A853; }
-        .google-logo .e { color: #EA4335; }
-        #chat-header .header-right { display: flex; align-items: center; gap: 12px; }
+        #chat-header h2 span { color: #a070d0; }
+        /* SPINNING LOGO */
+        #spinning-logo {
+            width: 40px;
+            height: 40px;
+            animation: spinLogo 4s linear infinite;
+            cursor: pointer;
+            filter: drop-shadow(0 0 15px rgba(160,112,208,0.3));
+            flex-shrink: 0;
+            display: inline-block;
+        }
+        @keyframes spinLogo {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        #spinning-logo img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+        #chat-header .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         #chat-header .user-badge { color: #a070d0; font-weight: 600; font-size: 14px; }
         #chat-header #logoutBtn {
             background: transparent; border: none; color: #6a4a8a;
             cursor: pointer; font-size: 12px; padding: 4px 10px; border-radius: 6px;
         }
         #chat-header #logoutBtn:hover { color: #ff6b8a; background: rgba(255,107,138,0.05); }
+        #adminPanelBtn {
+            background: transparent;
+            border: 1px solid rgba(160,112,208,0.3);
+            color: #a070d0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        #adminPanelBtn:hover { border-color: #a070d0; background: rgba(160,112,208,0.1); }
         #chat-body { display: flex; flex: 1; overflow: hidden; gap: 16px; }
         #members-sidebar {
             width: 180px;
@@ -143,6 +162,8 @@
         .member-item .actions button.pm:hover { color: #7ac39b; }
         .member-item .actions button.kick:hover { color: #ff6b8a; }
         .member-item .actions button.delete:hover { color: #ff3333; }
+        .member-item .actions button.jumpscare:hover { color: #ffaa00; }
+        .member-item .actions button.redirect:hover { color: #00ccff; }
         #messages-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         #messages-container .chat-target {
             color: #6a4a8a; font-size: 12px; margin-bottom: 6px; flex-shrink: 0;
@@ -214,6 +235,70 @@
         }
         #clearChatBtn:hover { border-color: #ffaa00; background: rgba(255,170,0,0.1); }
         #clearChatBtn.show { display: inline-block; }
+        /* Admin Panel Popup */
+        #adminPanel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10,0,21,0.95);
+            border: 2px solid #7a3aaa;
+            border-radius: 24px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 999;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 100px rgba(160,112,208,0.2);
+        }
+        #adminPanel.show { display: block; }
+        #adminPanel h3 { color: #a070d0; margin-bottom: 15px; font-size: 20px; text-align: center; }
+        #adminPanel .close-btn {
+            float: right;
+            background: transparent;
+            border: none;
+            color: #6a4a8a;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #adminPanel .close-btn:hover { color: #ff6b8a; }
+        #adminPanel .user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(58,26,90,0.2);
+            font-size: 14px;
+        }
+        #adminPanel .user-row .username { color: #d4b0ff; font-weight: 600; }
+        #adminPanel .user-row .password { color: #6a4a8a; font-family: monospace; font-size: 12px; }
+        #adminPanel .user-row .actions { display: flex; gap: 6px; }
+        #adminPanel .user-row .actions button {
+            background: transparent;
+            border: none;
+            color: #6a4a8a;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: 0.15s;
+        }
+        #adminPanel .user-row .actions button.kick:hover { color: #ff6b8a; }
+        #adminPanel .user-row .actions button.delete:hover { color: #ff3333; }
+        #adminPanel .user-row .actions button.jumpscare:hover { color: #ffaa00; }
+        #adminPanel .user-row .actions button.redirect:hover { color: #00ccff; }
+        #adminPanel .no-users { color: #6a4a8a; text-align: center; padding: 20px; }
+        #adminOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 998;
+        }
+        #adminOverlay.show { display: block; }
         @media (max-width: 600px) {
             #auth-box { padding: 30px 25px; }
             #chat-body { flex-direction: column; }
@@ -227,6 +312,8 @@
             .toast { right: 10px; left: 10px; max-width: none; bottom: 70px; }
             #chat-header h2 { font-size: 16px; gap: 8px; }
             #clearChatBtn { font-size: 9px; padding: 2px 8px; }
+            #adminPanel { width: 95%; padding: 20px; }
+            #spinning-logo { width: 32px; height: 32px; }
         }
     </style>
 </head>
@@ -252,13 +339,14 @@
     <div id="chat">
         <div id="chat-header">
             <h2>
-                <span class="google-logo">
-                    <span class="g">G</span><span class="o1">o</span><span class="o2">o</span><span class="o2">g</span><span class="l">l</span><span class="e">e</span>
+                <span id="spinning-logo">
+                    <img src="https://i.ibb.co/jvM0JPYh/1000023156-removebg-preview.png" alt="Logo">
                 </span>
-                <span style="color:#6a4a8a; font-weight:300; font-size:16px;">Chat</span>
+                Σ<span>HUB</span> Chat
             </h2>
             <div class="header-right">
                 <span class="user-badge" id="chatUserDisplay">User</span>
+                <button id="adminPanelBtn">👑 Admin</button>
                 <button id="clearChatBtn">🧹 Clear Chat</button>
                 <button id="logoutBtn">Logout</button>
             </div>
@@ -274,7 +362,7 @@
                     <button class="back-btn" id="backToPublicBtn">← Public</button>
                 </div>
                 <div id="messages">
-                    <div class="msg"><span class="user">System</span><span class="time">now</span><div class="text">Welcome!</div></div>
+                    <div class="msg"><span class="user">System</span><span class="time">now</span><div class="text">Welcome to Sigma Chat!</div></div>
                 </div>
                 <div class="input-area">
                     <input type="text" id="msgInput" placeholder="Type a message...">
@@ -283,10 +371,16 @@
             </div>
         </div>
     </div>
+    <div id="adminOverlay"></div>
+    <div id="adminPanel">
+        <button class="close-btn" id="adminPanelClose">✕</button>
+        <h3>👑 Admin Panel</h3>
+        <div id="adminUserList"></div>
+    </div>
     <div id="toast" class="toast"></div>
     <script>
     // ============================================================
-    // REALISTIC NIGHT SKY STARS (NO CONSOLE LOGS)
+    // REALISTIC NIGHT SKY STARS
     // ============================================================
     (function() {
         var canvas = document.getElementById('stars-canvas');
@@ -340,7 +434,6 @@
             this.driftX = (Math.random() - 0.5) * 0.01;
             this.driftY = (Math.random() - 0.5) * 0.01;
             this.isBright = Math.random() > 0.85;
-            this.color = Math.random() > 0.6 ? '#b090d0' : '#d4b0ff';
         }
 
         Star.prototype.update = function() {
@@ -460,36 +553,91 @@
     })();
 
     // ============================================================
-    // CHAT APP – CLIENT-SIDE ONLY (NO SERVER, NO CONSOLE LOGS)
+    // SERVER-SIDE CHAT – WORKS ACROSS ALL DEVICES
     // ============================================================
 
-    var USERS_KEY = 'sigma_users';
+    var API_URL = window.location.origin + '/api';
     var SESSION_KEY = 'sigma_session';
-    var MESSAGES_KEY = 'sigma_messages';
+
+    function getSession() { try { return localStorage.getItem(SESSION_KEY) || null; } catch(e) { return null; } }
+    function setSession(u) { try { localStorage.setItem(SESSION_KEY, u); } catch(e) {} }
+    function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} }
+
+    // ---- API CALLS ----
+    function registerUser(username, password) {
+        return fetch(API_URL + '/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) throw new Error(d.error);
+            return d;
+        });
+    }
+
+    function loginUser(username, password) {
+        return fetch(API_URL + '/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) throw new Error(d.error);
+            return d;
+        });
+    }
+
+    function sendMessage(username, text, to) {
+        return fetch(API_URL + '/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, text, to: to || 'public' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) throw new Error(d.error);
+            return d;
+        });
+    }
+
+    function getMessages() {
+        return fetch(API_URL + '/messages')
+            .then(function(r) { return r.json(); });
+    }
 
     function getUsers() {
-        try { return JSON.parse(localStorage.getItem(USERS_KEY)) || {}; }
-        catch { return {}; }
+        return fetch(API_URL + '/users')
+            .then(function(r) { return r.json(); });
     }
-    function saveUsers(u) {
-        localStorage.setItem(USERS_KEY, JSON.stringify(u));
+
+    function deleteUser(username) {
+        return fetch(API_URL + '/admin/users/' + username, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) throw new Error(d.error);
+                return d;
+            });
     }
-    function getMessages() {
-        try { return JSON.parse(localStorage.getItem(MESSAGES_KEY)) || []; }
-        catch { return []; }
+
+    function kickUser(username) {
+        return fetch(API_URL + '/admin/kick/' + username, { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) throw new Error(d.error);
+                return d;
+            });
     }
-    function saveMessages(m) {
-        localStorage.setItem(MESSAGES_KEY, JSON.stringify(m));
-    }
-    function getSession() {
-        try { return localStorage.getItem(SESSION_KEY) || null; }
-        catch { return null; }
-    }
-    function setSession(u) {
-        localStorage.setItem(SESSION_KEY, u);
-    }
-    function clearSession() {
-        localStorage.removeItem(SESSION_KEY);
+
+    function clearChat() {
+        return fetch(API_URL + '/admin/clear', { method: 'DELETE' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) throw new Error(d.error);
+                return d;
+            });
     }
 
     // ---- DOM ----
@@ -516,6 +664,11 @@
     var chatTargetLabel = document.getElementById('chatTargetLabel');
     var backToPublicBtn = document.getElementById('backToPublicBtn');
     var clearChatBtn = document.getElementById('clearChatBtn');
+    var adminPanelBtn = document.getElementById('adminPanelBtn');
+    var adminPanel = document.getElementById('adminPanel');
+    var adminOverlay = document.getElementById('adminOverlay');
+    var adminPanelClose = document.getElementById('adminPanelClose');
+    var adminUserList = document.getElementById('adminUserList');
     var currentUser = '';
     var currentDM = null;
     var messageInterval = null;
@@ -561,16 +714,18 @@
         if (!user || !pass) { regError.textContent = 'Fill all fields'; return; }
         if (user.length < 2) { regError.textContent = 'Min 2 chars'; return; }
         if (pass.length < 4) { regError.textContent = 'Min 4 chars'; return; }
-        var users = getUsers();
-        if (users[user]) { regError.textContent = 'Username taken'; return; }
-        users[user] = pass;
-        saveUsers(users);
-        regError.textContent = '';
-        showToast('Account created! Login now.');
-        registerBox.classList.add('hidden');
-        loginBox.classList.remove('hidden');
-        loginUser.value = user;
-        loginPass.value = '';
+        registerUser(user, pass)
+            .then(function() {
+                regError.textContent = '';
+                showToast('Account created! Login now.');
+                registerBox.classList.add('hidden');
+                loginBox.classList.remove('hidden');
+                loginUser.value = user;
+                loginPass.value = '';
+            })
+            .catch(function(err) {
+                regError.textContent = '❌ ' + err.message;
+            });
     };
 
     loginBtn.onclick = function() {
@@ -578,20 +733,17 @@
         var pass = loginPass.value.trim();
         loginError.textContent = '';
         if (!user || !pass) { loginError.textContent = 'Fill all fields'; return; }
-        var users = getUsers();
-        if (user === 'admin' && pass === 'sigma2024') {
-            setSession(user);
-            loginError.textContent = '';
-            showToast('Welcome, Admin!');
-            enterChat(user);
-            return;
-        }
-        if (!users[user]) { loginError.textContent = 'User not found'; return; }
-        if (users[user] !== pass) { loginError.textContent = 'Wrong password'; return; }
-        setSession(user);
-        loginError.textContent = '';
-        showToast('Welcome, ' + user);
-        enterChat(user);
+        loginUser(user, pass)
+            .then(function() {
+                setSession(user);
+                loginError.textContent = '';
+                showToast('Welcome, ' + user);
+                enterChat(user);
+            })
+            .catch(function(err) {
+                loginError.textContent = '❌ ' + err.message;
+                showToast('❌ ' + err.message);
+            });
     };
 
     loginPass.onkeydown = function(e) { if (e.key === 'Enter') loginBtn.click(); };
@@ -601,8 +753,7 @@
     // ---- Chat ----
     function isAdmin(username) { return username === 'admin'; }
 
-    function getDisplayMessages() {
-        var all = getMessages();
+    function getDisplayMessages(all) {
         if (currentDM) {
             var result = [];
             for (var i = 0; i < all.length; i++) {
@@ -625,91 +776,206 @@
     }
 
     function renderMessages() {
-        var msgs = getDisplayMessages();
-        if (msgs.length === 0) {
-            messagesDiv.innerHTML = '<div class="msg"><span class="user">System</span><span class="time">now</span><div class="text">' + (currentDM ? 'No messages with ' + currentDM + ' yet.' : 'No public messages yet. Say hello!') + '</div></div>';
-            return;
-        }
-        var html = '';
-        for (var i = 0; i < msgs.length; i++) {
-            var m = msgs[i];
-            var isDM = m.to && m.to !== 'public';
-            html += '<div class="msg' + (isDM ? ' dm' : '') + '">';
-            html += '<span class="user">' + escapeHtml(m.user) + '</span>';
-            html += '<span class="time">' + escapeHtml(m.time) + '</span>';
-            html += '<div class="text">' + escapeHtml(m.text) + '</div>';
-            html += '</div>';
-        }
-        messagesDiv.innerHTML = html;
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        getMessages().then(function(all) {
+            var msgs = getDisplayMessages(all);
+            if (msgs.length === 0) {
+                messagesDiv.innerHTML = '<div class="msg"><span class="user">System</span><span class="time">now</span><div class="text">' + (currentDM ? 'No messages with ' + currentDM + ' yet.' : 'No public messages yet. Say hello!') + '</div></div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < msgs.length; i++) {
+                var m = msgs[i];
+                var isDM = m.to && m.to !== 'public';
+                html += '<div class="msg' + (isDM ? ' dm' : '') + '">';
+                html += '<span class="user">' + escapeHtml(m.user) + '</span>';
+                html += '<span class="time">' + escapeHtml(m.time) + '</span>';
+                html += '<div class="text">' + escapeHtml(m.text) + '</div>';
+                html += '</div>';
+            }
+            messagesDiv.innerHTML = html;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }).catch(function() {});
     }
 
     function renderMembers() {
-        var users = getUsers();
-        var usernames = Object.keys(users);
-        if (!usernames.includes('admin')) usernames.push('admin');
-        usernames.sort(function(a, b) {
-            if (a === 'admin') return -1;
-            if (b === 'admin') return 1;
-            if (a === currentUser) return -1;
-            if (b === currentUser) return 1;
-            return a.localeCompare(b);
-        });
-        var html = '';
-        var isAdminUser = isAdmin(currentUser);
-        if (isAdminUser) {
-            clearChatBtn.classList.add('show');
-        } else {
-            clearChatBtn.classList.remove('show');
-        }
-        for (var i = 0; i < usernames.length; i++) {
-            var u = usernames[i];
-            var isMe = (u === currentUser);
-            var isAdminUser2 = (u === 'admin');
-            if (isAdminUser2 && !isAdminUser && !isMe) continue;
-            var showAdminControls = isAdminUser && !isAdminUser2 && !isMe;
-            html += '<div class="member-item">';
-            html += '<span class="name ' + (isMe ? 'me' : '') + (isAdminUser2 ? ' admin' : '') + '">' + (isAdminUser2 ? '👑 ' : '') + escapeHtml(u) + (isMe ? ' (you)' : '') + '</span>';
-            html += '<div class="actions">';
-            if (!isMe) {
-                html += '<button class="pm" onclick="startDM(\'' + escapeHtml(u) + '\')">💬</button>';
+        getUsers().then(function(usernames) {
+            if (!usernames.includes('admin')) usernames.push('admin');
+            usernames.sort(function(a, b) {
+                if (a === 'admin') return -1;
+                if (b === 'admin') return 1;
+                if (a === currentUser) return -1;
+                if (b === currentUser) return 1;
+                return a.localeCompare(b);
+            });
+            var html = '';
+            var isAdminUser = isAdmin(currentUser);
+            if (isAdminUser) {
+                clearChatBtn.classList.add('show');
+            } else {
+                clearChatBtn.classList.remove('show');
             }
-            if (showAdminControls) {
-                html += '<button class="kick" onclick="kickUser(\'' + escapeHtml(u) + '\')">🚫 Kick</button>';
-                html += '<button class="delete" onclick="deleteUser(\'' + escapeHtml(u) + '\')">🗑️ Delete</button>';
+            for (var i = 0; i < usernames.length; i++) {
+                var u = usernames[i];
+                var isMe = (u === currentUser);
+                var isAdminUser2 = (u === 'admin');
+                if (isAdminUser2 && !isAdminUser && !isMe) continue;
+                var showAdminControls = isAdminUser && !isAdminUser2 && !isMe;
+                html += '<div class="member-item">';
+                html += '<span class="name ' + (isMe ? 'me' : '') + (isAdminUser2 ? ' admin' : '') + '">' + (isAdminUser2 ? '👑 ' : '') + escapeHtml(u) + (isMe ? ' (you)' : '') + '</span>';
+                html += '<div class="actions">';
+                if (!isMe) {
+                    html += '<button class="pm" onclick="startDM(\'' + escapeHtml(u) + '\')">💬</button>';
+                }
+                if (showAdminControls) {
+                    html += '<button class="kick" onclick="kickUser(\'' + escapeHtml(u) + '\')">🚫</button>';
+                    html += '<button class="delete" onclick="deleteUser(\'' + escapeHtml(u) + '\')">🗑️</button>';
+                    html += '<button class="jumpscare" onclick="jumpscareUser(\'' + escapeHtml(u) + '\')">👻</button>';
+                    html += '<button class="redirect" onclick="redirectUser(\'' + escapeHtml(u) + '\')">🔗</button>';
+                }
+                html += '</div></div>';
             }
-            html += '</div></div>';
-        }
-        memberList.innerHTML = html || '<div style="color:#6a4a8a; font-size:12px;">No users</div>';
+            memberList.innerHTML = html || '<div style="color:#6a4a8a; font-size:12px;">No users</div>';
+        }).catch(function() {});
     }
 
-    // ---- Admin ----
+    // ---- Admin Panel ----
+    function openAdminPanel() {
+        if (!isAdmin(currentUser)) {
+            showToast('Admin only');
+            return;
+        }
+        getUsers().then(function(usernames) {
+            var html = '';
+            // Get users with passwords from server
+            fetch(API_URL + '/admin/users-with-passwords')
+                .then(function(r) { return r.json(); })
+                .then(function(users) {
+                    var userMap = {};
+                    if (Array.isArray(users)) {
+                        users.forEach(function(u) { userMap[u.username] = u.password; });
+                    }
+                    var sorted = usernames.sort();
+                    for (var i = 0; i < sorted.length; i++) {
+                        var u = sorted[i];
+                        if (u === 'admin') continue;
+                        var pass = userMap[u] || '••••••';
+                        html += '<div class="user-row">';
+                        html += '<span class="username">' + escapeHtml(u) + '</span>';
+                        html += '<span class="password">' + escapeHtml(pass) + '</span>';
+                        html += '<div class="actions">';
+                        html += '<button class="kick" onclick="kickUser(\'' + escapeHtml(u) + '\')">🚫</button>';
+                        html += '<button class="delete" onclick="deleteUser(\'' + escapeHtml(u) + '\')">🗑️</button>';
+                        html += '<button class="jumpscare" onclick="jumpscareUser(\'' + escapeHtml(u) + '\')">👻</button>';
+                        html += '<button class="redirect" onclick="redirectUser(\'' + escapeHtml(u) + '\')">🔗</button>';
+                        html += '</div></div>';
+                    }
+                    if (!html) html = '<div class="no-users">No users found</div>';
+                    adminUserList.innerHTML = html;
+                    adminPanel.classList.add('show');
+                    adminOverlay.classList.add('show');
+                })
+                .catch(function() {
+                    // Fallback: show usernames only
+                    for (var i = 0; i < usernames.length; i++) {
+                        var u = usernames[i];
+                        if (u === 'admin') continue;
+                        html += '<div class="user-row">';
+                        html += '<span class="username">' + escapeHtml(u) + '</span>';
+                        html += '<span class="password">••••••</span>';
+                        html += '<div class="actions">';
+                        html += '<button class="kick" onclick="kickUser(\'' + escapeHtml(u) + '\')">🚫</button>';
+                        html += '<button class="delete" onclick="deleteUser(\'' + escapeHtml(u) + '\')">🗑️</button>';
+                        html += '<button class="jumpscare" onclick="jumpscareUser(\'' + escapeHtml(u) + '\')">👻</button>';
+                        html += '<button class="redirect" onclick="redirectUser(\'' + escapeHtml(u) + '\')">🔗</button>';
+                        html += '</div></div>';
+                    }
+                    if (!html) html = '<div class="no-users">No users found</div>';
+                    adminUserList.innerHTML = html;
+                    adminPanel.classList.add('show');
+                    adminOverlay.classList.add('show');
+                });
+        }).catch(function() {});
+    }
+
+    function closeAdminPanel() {
+        adminPanel.classList.remove('show');
+        adminOverlay.classList.remove('show');
+    }
+
+    adminPanelBtn.onclick = openAdminPanel;
+    adminPanelClose.onclick = closeAdminPanel;
+    adminOverlay.onclick = closeAdminPanel;
+
+    // ---- Admin Actions ----
     window.kickUser = function(username) {
         if (!isAdmin(currentUser)) return;
         if (username === 'admin') { showToast('Cannot kick admin'); return; }
         if (!confirm('Kick ' + username + '? This will clear all their messages.')) return;
-        var msgs = getMessages();
-        msgs = msgs.filter(function(m) { return m.user !== username; });
-        saveMessages(msgs);
-        renderMessages();
-        renderMembers();
-        showToast('✅ ' + username + ' kicked');
+        kickUser(username)
+            .then(function() {
+                renderMessages();
+                renderMembers();
+                showToast('✅ ' + username + ' kicked');
+                closeAdminPanel();
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
     };
 
     window.deleteUser = function(username) {
         if (!isAdmin(currentUser)) return;
         if (username === 'admin') { showToast('Cannot delete admin'); return; }
         if (!confirm('PERMANENTLY DELETE account: ' + username + '?')) return;
-        var users = getUsers();
-        delete users[username];
-        saveUsers(users);
-        var msgs = getMessages();
-        msgs = msgs.filter(function(m) { return m.user !== username; });
-        saveMessages(msgs);
-        if (currentDM === username) goPublic();
-        renderMembers();
-        renderMessages();
-        showToast('🗑️ Account "' + username + '" deleted');
+        deleteUser(username)
+            .then(function() {
+                if (currentDM === username) goPublic();
+                renderMembers();
+                renderMessages();
+                showToast('🗑️ Account "' + username + '" deleted');
+                closeAdminPanel();
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
+    };
+
+    window.jumpscareUser = function(username) {
+        if (!isAdmin(currentUser)) return;
+        if (username === 'admin') { showToast('Cannot jumpscare admin'); return; }
+        if (!confirm('Jumpscare ' + username + '?')) return;
+        // Send jumpscare command to server
+        fetch(API_URL + '/admin/jumpscare/' + username, { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) throw new Error(d.error);
+                showToast('👻 Jumpscare sent to ' + username);
+                closeAdminPanel();
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
+    };
+
+    window.redirectUser = function(username) {
+        if (!isAdmin(currentUser)) return;
+        if (username === 'admin') { showToast('Cannot redirect admin'); return; }
+        var url = prompt('Enter URL to redirect ' + username + ' to:', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+        if (!url) return;
+        fetch(API_URL + '/admin/redirect/' + username, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url })
+        })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.error) throw new Error(d.error);
+                showToast('🔗 Redirect sent to ' + username);
+                closeAdminPanel();
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
     };
 
     // ---- Clear Chat ----
@@ -719,10 +985,15 @@
             return;
         }
         if (!confirm('Clear ALL chat messages? This cannot be undone.')) return;
-        saveMessages([]);
-        renderMessages();
-        renderMembers();
-        showToast('🧹 Chat cleared by Admin');
+        clearChat()
+            .then(function() {
+                renderMessages();
+                renderMembers();
+                showToast('🧹 Chat cleared by Admin');
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
     };
 
     // ---- DM ----
@@ -751,23 +1022,14 @@
     function sendMessageHandler() {
         var text = msgInput.value.trim();
         if (!text || !currentUser) return;
-        var msgs = getMessages();
-        var msgObj = {
-            user: currentUser,
-            text: text,
-            time: new Date().toLocaleTimeString()
-        };
-        if (currentDM) {
-            msgObj.to = currentDM;
-        } else {
-            msgObj.to = 'public';
-        }
-        msgs.push(msgObj);
-        if (msgs.length > 500) msgs.splice(0, msgs.length - 500);
-        saveMessages(msgs);
-        msgInput.value = '';
-        renderMessages();
-        renderMembers();
+        sendMessage(currentUser, text, currentDM)
+            .then(function() {
+                msgInput.value = '';
+                renderMessages();
+            })
+            .catch(function(err) {
+                showToast('❌ ' + err.message);
+            });
     }
 
     sendBtn.onclick = sendMessageHandler;
@@ -807,12 +1069,9 @@
     (function() {
         var session = getSession();
         if (session) {
-            var users = getUsers();
-            if (session === 'admin' || users[session]) {
-                showToast('Welcome back, ' + session);
-                enterChat(session);
-                return;
-            }
+            showToast('Welcome back, ' + session);
+            enterChat(session);
+            return;
         }
         authBox.style.display = 'block';
         chatDiv.classList.remove('show');
@@ -820,11 +1079,8 @@
 
     // ---- Create admin account ----
     (function() {
-        var users = getUsers();
-        if (!users['admin']) {
-            users['admin'] = 'sigma2024';
-            saveUsers(users);
-        }
+        // Admin is created on server via server.js
+        // Just ensure local session works
     })();
     </script>
 </body>
