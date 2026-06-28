@@ -29,6 +29,7 @@ function writeMessages(msgs) {
 // ---- Auth ----
 app.post('/api/register', (req, res) => {
     const { username, password } = req.body;
+    console.log('📝 Register:', username);
     if (!username || !password || username.length < 2 || password.length < 4) {
         return res.status(400).json({ error: 'Invalid input' });
     }
@@ -43,6 +44,7 @@ app.post('/api/register', (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
+    console.log('🔑 Login:', username);
     if (!username || !password) {
         return res.status(400).json({ error: 'Missing fields' });
     }
